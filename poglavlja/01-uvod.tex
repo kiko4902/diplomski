@@ -1,0 +1,45 @@
+% ============================================================
+% 01-uvod.tex — PRVA VERZIJA
+% ============================================================
+
+Ukratko navesti \v{s}to je to klasifikacija i \v{s}to joj je cilj te
+neke od primjena koje obuhva\'{c}a. Sa\v{z}eto navesti problem
+neuravnote\v{z}enosti klasa (engl.\ class imbalance) i kako utje\v{c}e
+na u\v{c}inkovitost klasifikatora, osvrnuti se na to kako je manjinska
+klasa (engl.\ minority class) \v{c}esto upravo ona od interesa. Treba
+spomenuti preuzorkovanje (engl.\ oversampling) i poduzorkovanje (engl.\
+undersampling) kao na\v{c}ine rukovanja navedenim problemom koji se
+koriste samo dostupnim podacima.
+
+Nadalje, navesti algoritam SMOTE (Synthetic Minority Over-sampling
+Technique) kao popularni i u\v{c}inkoviti pristup preuzorkovanju koji
+generira sinteti\v{c}ke primjere manjinske klase. Zbog nedostataka
+temeljnog SMOTE-a --- prekomjerne generalizacije, osjetljivosti na
+\v{s}um, generiranja u podru\v{c}jima ve\'{c}inske klase --- predlo\v{z}ena
+su brojna pro\v{s}irenja: Borderline-SMOTE, ADASYN, Safe-Level-SMOTE,
+K-Means SMOTE, SVM-SMOTE, SMOTE-ENN, SMOTE-Tomek te geometrijske
+varijante poput G-SMOTE i Random SMOTE. Svaka izvedenica nastoji
+rije\v{s}iti odre\dj{}eni nedostatak originala --- bilo druga\v{c}ijim
+na\v{c}inom odabira primjera za preuzorkovanje, bilo druga\v{c}ijim
+na\v{c}inom stvaranja sinteti\v{c}kih uzoraka. Radi cjelovitosti,
+u obzir su uzeti i alternativni pristupi: cost-sensitive u\v{c}enje,
+ansambl metode te pristupi zasnovani na neuronskim mre\v{z}ama.
+
+Treba naglasiti da ne postoji univerzalno najbolji algoritam za
+preuzorkovanje --- u\v{c}inkovitost pojedine varijante ovisi o
+karakteristikama skupa podataka: omjeru neuravnote\v{z}enosti,
+dimenzionalnosti, prisutnosti \v{s}uma i geometrijskoj strukturi. Cilj
+ovog rada jest eksperimentalno usporediti navedene algoritme na
+skupovima podataka razli\v{c}itih karakteristika te statisti\v{c}ki
+utvrditi zna\v{c}ajnost uo\v{c}enih razlika.
+
+Ostatak rada organiziran je na sljede\'{c}i na\v{c}in. Drugo poglavlje
+obra\dj{}uje problem neuravnote\v{z}enosti klasa i temeljni SMOTE
+algoritam, uklju\v{c}uju\'{c}i mjere za evaluaciju i ote\v{z}avaju\'{c}e
+faktore. Tre\'{c}e poglavlje donosi detaljan pregled izvedenica i
+alternativnih pristupa. \v{C}etvrto poglavlje opisuje ostvareno
+programsko rje\v{s}enje --- arhitekturu, implementirane algoritme,
+na\v{c}in kori\v{s}tenja te web su\v{c}elje za vizualizaciju
+generiranja sinteti\v{c}kih primjera. Peto poglavlje sadr\v{z}i
+eksperimentalnu analizu, od opisa podataka i postavki eksperimenata
+do statisti\v{c}ke obrade i diskusije rezultata.

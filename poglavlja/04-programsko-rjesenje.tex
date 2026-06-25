@@ -1,0 +1,109 @@
+% ============================================================
+% 04-programsko-rjesenje.tex - PRVA VERZIJA
+% ============================================================
+
+Programsko rje\v{s}enje razvijeno je u programskom jeziku Python, a
+obuhva\'{c}a samostalnu implementaciju svih jedanaest SMOTE algoritama,
+evaluacijski okvir za eksperimentalnu analizu s osam klasifikatora i
+vi\v{s}e metrika evaluacije, modul za statisti\v{c}ku obradu rezultata
+te web su\v{c}elje za interaktivnu vizualizaciju. U nastavku se
+detaljno opisuju arhitektura i na\v{c}in rada.
+
+\subsection{Na\v{c}in rada programskog rje\v{s}enja}
+
+Arhitektura rje\v{s}enja sastoji se od nekoliko me\dj{}usobno povezanih
+modula. Jezgru \v{c}ini paket \texttt{smote\_variants} s apstraktnom
+baznom klasom \texttt{BaseSMOTE} koja definira su\v{c}elje
+\texttt{fit\_resample(X, y)} \v{s}to ga svaka izvedenica mora
+implementirati. Ovo omogu\'{c}uje uniformno kori\v{s}tenje svih
+algoritama u evaluacijskom okviru. Implementirane su sljede\'{c}e
+varijante: SMOTE, Borderline-SMOTE (obje ina\v{c}ice --- BS1 i BS2),
+ADASYN, Safe-Level-SMOTE, K-Means SMOTE, SVM-SMOTE, SMOTE-ENN,
+SMOTE-Tomek, Geometric SMOTE (G-SMOTE), Random SMOTE i Polynom-Fit SMOTE.
+Svi algoritmi implementirani su samostalno (from-scratch), oslanjaju\'{c}i
+se na biblioteke \texttt{numpy} za numeri\v{c}ke operacije i
+\texttt{scikit-learn} \cite{pedregosa2011} isklju\v{c}ivo za KNN
+pretra\v{z}ivanje (\texttt{NearestNeighbors}), klasteriranje
+(\texttt{KMeans}) i SVM (\texttt{SVC}) kod odgovaraju\'{c}ih izvedenica.
+
+Za svaki SMOTE algoritam predvi\dj{}eno je iterativno ispitivanje vi\v{s}e
+vrijednosti klju\v{c}nih parametara --- primjerice, broj susjeda $k$
+testirat \'{c}e se u rasponu $\{3, 5, 7, 10\}$ --- kako bi se za svaki
+skup podataka i klasifikator identificirala konfiguracija koja daje
+najbolje rezultate. Ovaj pristup omogu\'{c}uje pravednu usporedbu
+algoritama jer svaki od njih dolazi do izra\v{z}aja u svojoj optimalnoj
+postavci, \v{c}ime se izbjegava pristranost koja bi nastala fiksiranjem
+istih vrijednosti parametara za sve varijante.
+
+Evaluacijski modul implementira stratificiranu $k$-struku unakrsnu
+validaciju ($k = 5$) za svaku kombinaciju algoritma preuzorkovanja i
+klasifikatora. Kori\v{s}teni klasifikatori uklju\v{c}uju stablo odluke
+(DT), slu\v{c}ajnu \v{s}umu (RF), XGBoost \v{c}ija je prednost ugra\dj{}ena
+podr\v{s}ka za neuravnote\v{z}ene klase kroz parametar
+\texttt{scale\_pos\_weight}, logisti\v{c}ku regresiju (LR), SVM s RBF
+jezgrom, $k$-NN, Gaussov naivni Bayes (GNB) te vi\v{s}eslojni perceptron
+(MLP) s jednim skrivenim slojem kao jednostavna neuronska referentna
+to\v{c}ka. Svi klasifikatori preuzeti su iz biblioteke scikit-learn, uz
+iznimku XGBoosta koji dolazi iz istoimene biblioteke.
+
+Za evaluaciju performansi prikupljat \'{c}e se \v{s}iri skup metrika
+nego \v{s}to je to uobi\v{c}ajeno u sli\v{c}nim radovima, s ciljem
+\v{s}to potpunijeg i znanstveno utemeljenog uvida u pona\v{s}anje
+svakog algoritma. Iako su neke od ovih mjera ra\v{c}unski zahtjevnije
+od jednostavne to\v{c}nosti klasifikacije --- primjerice, AUC-PR zahtijeva
+izra\v{c}un krivulje u vi\v{s}e to\v{c}aka, a MCC uzima u obzir sva
+\v{c}etiri elementa matrice zbunjenosti --- upravo ta slo\v{z}enost
+omogu\'{c}uje pouzdaniju procjenu na neuravnote\v{z}enim podacima.
+Prikupljat \'{c}e se sljede\'{c}e metrike:
+F-1 mjera kao harmonijska sredina preciznosti i odziva; G-Mean kao
+geometrijska sredina odziva i specifi\v{c}nosti, \v{s}to je posebno
+prikladno za neuravnote\v{z}ene podatke jer ka\v{z}njava modele koji
+favoriziraju jednu klasu; AUC-ROC kao mjera separabilnosti klasa neovisna
+o pragu odluke; AUC-PR (povr\v{s}ina ispod Precision-Recall krivulje)
+koja je informativnija od AUC-ROC kod ekstremne neuravnote\v{z}enosti;
+Balanced Accuracy kao aritmeti\v{c}ka sredina odziva i specifi\v{c}nosti;
+Matthewsov koeficijent korelacije (MCC) koji pru\v{z}a sveobuhvatnu ocjenu
+temeljem sva \v{c}etiri elementa matrice zbunjenosti i smatra se jednom od
+najpouzdanijih pojedina\v{c}nih mjera za neuravnote\v{z}ene probleme; te
+F2-mjera koja daje ve\'{c}u te\v{z}inu odzivu, \v{s}to je relevantno u
+domenama gdje su la\v{z}no negativni primjeri skuplji od la\v{z}no
+pozitivnih.
+
+Modul za statisti\v{c}ku analizu provodit \'{c}e tri testa \v{c}iji
+\'{c}e se rezultati koristiti pri interpretaciji eksperimentalnih
+nalaza u petom poglavlju. Friedmanov test \cite{demsar2006} slu\v{z}i za
+utvr\dj{}ivanje postoje li statisti\v{c}ki zna\v{c}ajne razlike me\dj{}u
+algoritmima na razini svih skupova podataka --- odnosno, nije li uo\v{c}ena
+razlika u performansama tek posljedica slu\v{c}ajnosti. U slu\v{c}aju
+odbacivanja nul-hipoteze Friedmanovog testa, Nemenyi post-hoc test
+identificira koji konkretni parovi algoritama se statisti\v{c}ki
+zna\v{c}ajno razlikuju, a rezultati se prikazuju kriti\v{c}nim
+dijagramima. Wilcoxon signed-rank test koristit \'{c}e se za direktnu
+usporedbu svake izvedenice s osnovnim SMOTE algoritmom kao referentnom
+to\v{c}kom, \v{c}ime se dobiva odgovor na pitanje donosi li odre\dj{}ena
+modifikacija SMOTE-a zna\v{c}ajno pobolj\v{s}anje ili ne. Svi testovi
+provodit \'{c}e se kori\v{s}tenjem biblioteke \texttt{scipy.stats}.
+
+Vizualizacijski modul slu\v{z}i za grafi\v{c}ki prikaz rezultata kroz
+CD dijagrame, box-plotove, heatmap-e i scatter prikaze sinteti\v{c}kih
+primjera.
+
+\subsection{Prikaz i na\v{c}in uporabe programskog rje\v{s}enja}
+
+Eksperimenti se pokre\'{c}u iz komandne linije naredbom
+\texttt{python run\_analysis.py}, pri \v{c}emu je mogu\'{c}e konfigurirati
+parametre SMOTE algoritama, odabir klasifikatora i skupova podataka.
+Rezultati eksperimenata pohranjuju se u CSV formatu i prikazuju kroz
+tablice i grafove. Web su\v{c}elje --- opisano u nastavku ovog poglavlja --- omogu\'{c}it
+\'{c}e interaktivnu vizualizaciju procesa generiranja sinteti\v{c}kih
+primjera. Za ilustraciju \'{c}e se koristiti screenshotovi glavnih
+dijelova su\v{c}elja.
+
+Eventualno, dati dijagram toka programskog rje\v{s}enja na visokoj razini
+koji prikazuje tijek od u\v{c}itavanja podataka do prikaza rezultata.
+Klju\v{c}ni dijelovi programskog k\^{o}da bit \'{c}e prilo\v{z}eni u
+prilogu.
+
+\subsection{Web su\v{c}elje za vizualizaciju}
+
+\input{poglavlja/06-web-sucelje}

@@ -1,0 +1,162 @@
+% ============================================================
+% 03-izvedenice-i-alternative.tex — PRVA VERZIJA
+% ============================================================
+
+Temeljni SMOTE algoritam, unato\v{c} svojoj popularnosti, ima nekoliko
+uo\v{c}enih nedostataka --- od prekomjerne generalizacije do generiranja
+sinteti\v{c}kih primjera u podru\v{c}jima ve\'{c}inske klase
+\cite{fernandez2018}. Ovi nedostaci motivirali su razvoj brojnih
+izvedenica koje nastoje adresirati pojedine probleme. U ovom poglavlju
+bit \'{c}e opisane klju\v{c}ne izvedenice SMOTE algoritma, uklju\v{c}uju\'{c}i
+geometrijska pro\v{s}irenja, te alternativni pristupi rje\v{s}avanju
+problema neuravnote\v{z}enosti klasa.
+
+\subsection{Borderline-SMOTE}
+
+Borderline-SMOTE \cite{han2005} fokusira se na grani\v{c}ne primjere
+manjinske klase koji su klju\v{c}ni za odre\dj{}ivanje granice odluke.
+Opisat \'{c}e se kategorizacija manjinskih primjera u tri skupine na
+temelju broja ve\'{c}inskih susjeda me\dj{}u $m$ najbli\v{z}ih: sigurni
+(Safe), grani\v{c}ni (Danger) i \v{s}um (Noise). Zatim se opisuju
+dvije varijante: Borderline-SMOTE1 koja preuzorkuje samo Danger primjere
+koriste\'{c}i isklju\v{c}ivo manjinske susjede, i Borderline-SMOTE2 koja
+dopu\v{s}ta i ve\'{c}inske susjede uz faktor $\lambda \in (0, 0.5)$.
+Dat \'{c}e se pseudo-k\^{o}d za obje varijante. Prednost je fokusiranje
+na grani\v{c}ne primjere, a nedostatak osjetljivost na odabir parametra
+$m$.
+
+\subsection{ADASYN}
+
+ADASYN (Adaptive Synthetic Sampling) \cite{he2008adasyn} uvodi adaptivni
+pristup: vi\v{s}e sinteti\v{c}kih primjera generira se u podru\v{c}jima
+gdje je ve\'{c}inska klasa gu\v{s}\'{c}a u susjedstvu manjinskih primjera.
+Opisat \'{c}e se ra\v{c}unanje omjera $\Gamma_i = \Delta_i / k$ gdje je
+$\Delta_i$ broj ve\'{c}inskih susjeda me\dj{}u $k$ najbli\v{z}ih,
+normalizacija u distribuciju $\hat{\Gamma}_i$ te raspodjela ukupnog broja
+sinteti\v{c}kih primjera $G$ prema toj distribuciji. Dat \'{c}e se
+pseudo-k\^{o}d. Automatsko fokusiranje na te\v{s}ke primjere je glavna
+prednost, dok je mana osjetljivost na outlier-e koji dobivaju najvi\v{s}e
+sinteti\v{c}kih primjera.
+
+\subsection{Safe-Level-SMOTE}
+
+Safe-Level-SMOTE \cite{bunkhumpornpat2009} uvodi koncept sigurnosne razine
+(safe-level) za svaki manjinski primjer --- broj manjinskih susjeda me\dj{}u
+$k$ najbli\v{z}ih. Opisat \'{c}e se strategije generiranja ovisno o omjeru
+sigurnosnih razina originalnog primjera $sl_p$ i susjeda $sl_n$: ako su
+obje niske, generiranje se izbjegava; ako je jedna nula, koristi se kopija
+sigurnijeg primjera; ako je $sl_p < sl_n$, novi primjer smje\v{s}ta se
+bli\v{z}e sigurnijem. Dat \'{c}e se pseudo-k\^{o}d. Izbjegavanje
+generiranja u nesigurnim podru\v{c}jima je prednost, dok je nedostatak
+konzervativnost koja mo\v{z}e ograni\v{c}iti pro\v{s}irenje manjinske
+klase.
+
+\subsection{K-Means SMOTE}
+
+K-Means SMOTE \cite{douzas2018} rje\v{s}ava problem unutar-klasnog
+disbalansa. Postupak: prvo se manjinski primjeri grupiraju K-Means
+algoritmom, zatim se identificiraju rijetki klasteri i dodjeljuje im se
+proporcionalno vi\v{s}e sinteti\v{c}kih primjera (te\v{z}ina $\propto
+1/\text{veli\v{c}ina\_klastera}$), nakon \v{c}ega se SMOTE primjenjuje
+unutar svakog klastera koriste\'{c}i samo susjede iz istog klastera.
+Dat \'{c}e se pseudo-k\^{o}d. Istovremeno rje\v{s}avanje me\dj{}u-klasnog
+i unutar-klasnog disbalansa predstavlja glavnu prednost, dok su dodatni
+parametar (broj klastera) i ve\'{c}a ra\v{c}unska zahtjevnost glavni
+nedostaci. Srodni pristupi temeljeni na filtriranju obra\dj{}eni su
+u radu \cite{saez2015}.
+
+\subsection{SVM-SMOTE}
+
+SVM-SMOTE \cite{nguyen2011} koristi SVM klasifikator za identifikaciju
+potpornih vektora manjinske klase koji le\v{z}e na granici odluke.
+Postupak: trenira se SVM na originalnim podacima, identificiraju se
+potporni vektori manjinske klase, a zatim se generiraju sinteti\v{c}ki
+primjeri du\v{z} linija koje spajaju te potporne vektore s njihovim
+najbli\v{z}im susjedima. Dat \'{c}e se pseudo-k\^{o}d. Precizno
+pozicioniranje novih primjera na granici odluke je klju\v{c}na prednost,
+a ve\'{c}a ra\v{c}unska slo\v{z}enost zbog treniranja SVM-a glavni
+nedostatak.
+
+\subsection{SMOTE-ENN i SMOTE-Tomek}
+
+SMOTE-ENN i SMOTE-Tomek \cite{batista2004} kombiniraju preuzorkovanje s
+naknadnim \v{c}i\v{s}\'{c}enjem skupa podataka. SMOTE-ENN prvo generira
+sinteti\v{c}ke primjere, a zatim uklanja sve primjere koje ve\'{c}ina
+$k$-NN susjeda pogre\v{s}no klasificira. SMOTE-Tomek tako\dj{}er prvo
+primjenjuje SMOTE, a zatim uklanja Tomek Link parove --- parove primjera
+razli\v{c}itih klasa koji su me\dj{}usobno najbli\v{z}i. Dat \'{c}e se
+pseudo-k\^{o}d za oba pristupa. Prednost je smanjenje \v{s}uma i
+preklapanja klasa, dok je nedostatak mogu\'{c}nost gubitka korisnih
+primjera.
+
+\subsection{Geometrijska pro\v{s}irenja SMOTE-a}
+
+Izvorni SMOTE generira sinteti\v{c}ke primjere isklju\v{c}ivo na linijskom
+segmentu izme\dj{}u dva postoje\'{c}a primjera, \v{s}to ograni\v{c}ava
+raznolikost generiranih uzoraka. U nastavku se opisuju tri geometrijska
+pro\v{s}irenja koja adresiraju ovo ograni\v{c}enje.
+
+G-SMOTE (Geometric SMOTE) \cite{douzas2019} generira sinteti\v{c}ke
+primjere unutar vi\v{s}edimenzionalnog geometrijskog sektora definiranog
+manjinskim primjerom kao sredi\v{s}tem i smjerom prema odabranom susjedu.
+Uvodi dva dodatna parametra: faktor deformacije i faktor skra\'{c}ivanja
+koji kontroliraju koliko daleko od linije se primjer mo\v{z}e generirati.
+G-SMOTE se mo\v{z}e koristiti kao izravna zamjena za osnovni SMOTE.
+
+Random SMOTE \cite{dong2011} za svaki manjinski primjer nasumi\v{c}no bira
+smjer i udaljenost za generiranje, \v{c}ime pove\'{c}ava raznolikost ali
+mo\v{z}e generirati u podru\v{c}jima ve\'{c}inske klase.
+
+Polynom-Fit SMOTE \cite{gazzah2008} koristi polinomnu interpolaciju kroz
+vi\v{s}e susjeda umjesto linearnog segmenta, \v{s}to bolje prati stvarnu
+geometriju podataka kod nelinearnih distribucija. Jo\v{s} jedno
+zna\v{c}ajno geometrijsko/te\v{z}insko pro\v{s}irenje koje nije
+implementirano u ovom radu je MWMOTE \cite{barua2014}.
+
+\subsection{Usporedni pregled izvedenica}
+
+Dat \'{c}e se tablica sa sumarnim pregledom svih obra\dj{}enih izvedenica,
+uklju\v{c}uju\'{c}i referencu, godinu objave, klju\v{c}ni problem koji
+rje\v{s}ava, osnovni koncept i klju\v{c}ne parametre. Dodatne varijante
+poput MWMOTE \cite{barua2014} i SMOTE-IPF \cite{saez2015} postoje u
+literaturi, no izvan su opsega ove eksperimentalne usporedbe.
+
+\subsection{Alternativni pristupi rje\v{s}avanju problema}
+
+\subsubsection{Metode poduzorkovanja}
+
+Opisat \'{c}e se metode koje smanjuju dominaciju ve\'{c}inske klase
+uklanjanjem njenih primjera: NearMiss, Tomek Links, Edited Nearest
+Neighbors (ENN) i One-Sided Selection (OSS). Za svaku \'{c}e se objasniti
+princip rada i situacije u kojima se koristi. Koristit \'{c}e se
+literatura \cite{batista2004,liu2009}.
+
+\subsubsection{Cost-sensitive u\v{c}enje}
+
+Opisat \'{c}e se princip cost-sensitive u\v{c}enja \cite{elkan2001} kod
+kojeg se razli\v{c}itim klasama dodjeljuju razli\v{c}ite cijene pogre\v{s}ne
+klasifikacije, \v{c}ime se klasifikator prisiljava da posveti vi\v{s}e
+pa\v{z}nje manjinskoj klasi. Objasnit \'{c}e se implementacija putem
+matrice tro\v{s}kova i class\_weight parametra. Navest \'{c}e se prednosti
+(ne mijenja distribuciju podataka) i nedostaci (zahtijeva pa\v{z}ljivo
+definiranje tro\v{s}kova).
+
+\subsubsection{Ansambl metode}
+
+Opisat \'{c}e se ansambl pristupi koji kombiniraju resampliranje s
+bagging i boosting metodama: SMOTEBoost \cite{chawla2003} primjenjuje
+SMOTE u svakoj iteraciji AdaBoost-a, RUSBoost \cite{seiffert2010} koristi
+nasumi\v{c}no poduzorkovanje, EasyEnsemble i BalanceCascade \cite{liu2009}
+koriste vi\v{s}estruko poduzorkovanje ve\'{c}inske klase, a
+BalancedRandomForest balansira bootstrap uzorke. Pregled \'{c}e se
+temeljiti na radu \cite{galar2012}.
+
+\subsubsection{Pristupi zasnovani na neuronskim mre\v{z}ama}
+
+Opisat \'{c}e se Focal Loss funkcija \cite{lin2017} koja modificira
+cross-entropy smanjuju\'{c}i doprinos lakih primjera, te generativne
+suprotstavljene mre\v{z}e \cite{goodfellow2014} za generiranje
+visokokvalitetnih sinteti\v{c}kih primjera manjinske klase. Navest
+\'{c}e se prednosti (kvaliteta generiranja) i nedostaci (veliki zahtjevi
+za koli\v{c}inom podataka i ra\v{c}unskim resursima). Ovaj dio \'{c}e biti
+pregledan jer fokus rada ostaje na SMOTE algoritmima.

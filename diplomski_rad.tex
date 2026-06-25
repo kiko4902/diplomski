@@ -1,0 +1,229 @@
+%Prva naredba uvijek definira klasu dokumenta. Mi koristimo 'article'
+
+\documentclass[a4paper,12pt,oneside]{article}
+
+
+
+%***********************************************************************************
+% Sada slijedi niz poziva Paketa funkcija cije ce se naredbe kasnije koristiti:
+%***********************************************************************************
+
+%Paket za upravljanje sa listama
+\usepackage{enumitem}
+
+% Paket za podesavanje brojeva stranica
+\usepackage{scrlayer-scrpage}                  
+	\ifoot[]{}
+	\cfoot[]{}
+	\ofoot[\pagemark]{\pagemark}
+	\pagestyle{scrplain}
+	
+	
+% Najcesce koristeni paketi za matematiku i formatiranje rada:
+\usepackage{xurl}
+\usepackage{url}
+\usepackage{amsmath, amsthm}
+\usepackage{mathtools}
+\usepackage{latexsym,amsfonts,amssymb,amsbsy,graphics}
+\usepackage{graphicx}
+\usepackage[croatian]{babel} %Omogucava pisanje hrvatskih znakoba
+\usepackage{gensymb}
+\usepackage{pdfpages}  %Omogucava importiranje stranica pdf fila u dokument
+\usepackage{pdflscape} %Omogucava okretanje pojedine stranice landscape dok su ostale portrait
+
+
+% Paket za postavke naslova i podnaslova
+\usepackage{titlesec}  
+	\newcommand{\periodafter}[1]{#1.}
+	\titleformat{\section}[hang]{\bf\large\uppercase}{\thesection.}{5pt}{}{}
+	\titleformat{\subsection}[hang]{\bf\large}{\thesubsection.}{3pt}{}{}
+
+% Dva paketa za imenovanje slika i tablica
+\usepackage{subcaption}
+\usepackage[labelfont=bf,textfont=it,labelsep = colon]{caption}  
+	\captionsetup[figure]{name=SL.}
+	\captionsetup[table]{name=Tab.}
+
+% Paket sa bojama za formatiranje svega gdje se mjenja boja
+\usepackage{xcolor}
+
+% Paket za omogucavanje importiranja programskih kodova u tekst
+\usepackage{listings} 
+	\lstset{
+  		numbers=left,
+  		numberstyle=\tiny,
+  		columns=fullflexible,
+  		breaklines=true,
+  		postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+  		xleftmargin=5.0ex
+	}
+	\renewcommand{\lstlistingname}{Primjer koda}% Listing -> Algorithm
+
+% Paket za formatiranje Sadrzaja
+\usepackage[dotinlabels]{titletoc}
+	\dottedcontents{section}[5em]{\bfseries}{2em}{1pc}
+	\dottedcontents{subsection}[7em]{}{2em}{1pc}
+	
+	
+	
+% Najbolji paket u svemiru za matematicko pisanje tekstova
+\usepackage{physics}
+
+% Paket za postavljanje linkova na koje se moze klikat u pdfu (prema formuli broj x- click odvede na to)
+\usepackage[colorlinks,linkcolor={red!50!black},citecolor={blue!50!black},urlcolor={blue!80!black}]{hyperref}
+
+
+% Postavke margina stranica - NE DIRAJ
+
+\setlength{\topmargin}{-0.7in}             
+\setlength{\oddsidemargin}{-2mm}
+\setlength{\evensidemargin}{-2mm}
+\setlength{\textwidth}{170mm}
+\setlength{\textheight}{256mm}
+\setlength{\parindent}{1cm}
+
+
+%**************************************************************************************************************
+% Prostor za tvoje pakete je ovdje:
+%**************************************************************************************************************
+
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{float}
+
+
+%**************************************************************************************************************
+
+
+
+
+%Kraj preamble naredbi, krece se sa pisanjem dokumenta
+%**************************************************************************************************************
+
+
+\begin{document}
+
+%**************************************************************************************************************
+% Postavke za numeriranje, prorede i ostalo
+%**************************************************************************************************************
+
+\setcounter{MaxMatrixCols}{20}                          %Postavka da matrica moze imati vise od 10 stupaca
+\renewcommand{\baselinestretch}{1.5}                    %postavke za prored 1.5%
+\renewcommand{\thefigure}{\thesection.\arabic{figure}}  %postavke za imenovanje slika po poglavljima%
+\renewcommand{\thetable}{\thesection.\arabic{table}}   %postavke za imenovanje tablica po poglavljima%
+\renewcommand{\theequation}{\thesection-\arabic{equation}} %postavke za brojanje jednadzbi po poglavljima%
+\renewcommand{\refname}{LITERATURA}						% Uppercase Literatura
+
+%**************************************************************************************************************
+
+
+
+
+%**************************************************************************************************************
+% NASLOVNA STRANICA
+%**************************************************************************************************************
+
+\input{poglavlja/00-naslovnica}
+
+
+
+%**************************************************************************************************************
+% OBRASCI I FORMULARI
+%**************************************************************************************************************
+
+% Ubaciti pdf verzije D1 obrazca i izjave o originalnosti. 
+% Sustav MAK automatski ume\'ce ove dokumente.
+
+
+%\newpage
+%\includepdf{D1_obrazac.pdf}
+%\newpage
+%\includepdf{Originalnost.pdf}
+%\newpage
+
+
+
+
+%**************************************************************************************************************
+% TABLE OF CONTENTS
+%**************************************************************************************************************
+
+{
+	\hypersetup{linkcolor=black}
+	\tableofcontents
+}
+%**************************************************************************************************************
+
+
+
+\newpage
+
+% ================================================================
+% 1. UVOD
+% ================================================================
+\section{UVOD}
+\input{poglavlja/01-uvod}
+
+% ================================================================
+% 2. PROBLEM NEURAVNOTE\v{Z}ENOSTI KLASA I ALGORITAM SMOTE
+% ================================================================
+\section{PROBLEM NEURAVNOTE\v{Z}ENOSTI KLASA I ALGORITAM SMOTE}
+\input{poglavlja/02-neuravnotezenost-i-smote}
+
+% ================================================================
+% 3. IZVEDENICE ALGORITMA SMOTE I ALTERNATIVNI PRISTUPI
+% ================================================================
+\section{IZVEDENICE ALGORITMA SMOTE I ALTERNATIVNI PRISTUPI}
+\input{poglavlja/03-izvedenice-i-alternative}
+
+% ================================================================
+% 4. OSTVARENO PROGRAMSKO RJE\v{S}ENJE
+% ================================================================
+\section{OSTVARENO PROGRAMSKO RJE\v{S}ENJE}
+\input{poglavlja/04-programsko-rjesenje}
+
+% ================================================================
+% 5. EKSPERIMENTALNA ANALIZA
+% ================================================================
+\section{EKSPERIMENTALNA ANALIZA}
+\input{poglavlja/05-eksperimentalna-analiza}
+
+% ================================================================
+% 6. ZAKLJU\v{C}AK
+% ================================================================
+\section{ZAKLJU\v{C}AK}
+\input{poglavlja/07-zakljucak}
+
+% ================================================================
+% LITERATURA
+% ================================================================
+
+\newpage
+\bibliographystyle{unsrt}
+\bibliography{references}
+
+% ================================================================
+% SA\v{Z}ETAK
+% ================================================================
+
+\newpage
+\section*{Sa\v{z}etak}
+\addcontentsline{toc}{section}{Sa\v{z}etak}
+\input{poglavlja/00-sazetak-hr}
+
+\newpage
+\section*{Abstract}
+\addcontentsline{toc}{section}{Abstract}
+\input{poglavlja/00-sazetak-en}
+
+% ================================================================
+% PRILOZI
+% ================================================================
+
+\newpage
+\section*{Prilog 1 --- Pro\v{s}ireni rezultati}
+\addcontentsline{toc}{section}{Prilog 1 --- Pro\v{s}ireni rezultati}
+\input{poglavlja/09-prilozi}
+
+\end{document}

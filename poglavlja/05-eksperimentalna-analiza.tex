@@ -1,0 +1,123 @@
+% ============================================================
+% 05-eksperimentalna-analiza.tex — PRVA VERZIJA
+% ============================================================
+
+Eksperimentalna analiza ima za cilj usporediti u\v{c}inkovitost
+jedanaest SMOTE varijanti na skupovima podataka razli\v{c}itih
+karakteristika. Analizirat \'{c}e se utjecaj omjera neuravnote\v{z}enosti,
+dimenzionalnosti i prisutnosti \v{s}uma na relativne performanse
+algoritama, a statisti\v{c}kim testovima provjerit \'{c}e se
+zna\v{c}ajnost uo\v{c}enih razlika.
+
+\subsection{Opis skupova podataka}
+
+Opisuju se skupovi podataka kori\v{s}teni u eksperimentalnoj
+analizi. Koristit \'{c}e se kombinacija stvarnih i sinteti\v{c}kih
+skupova. Za stvarne skupove bit \'{c}e odabran odre\dj{}eni broj
+neuravnote\v{z}enih skupova podataka iz razli\v{c}itih domena, pri
+\v{c}emu \'{c}e se nastojati obuhvatiti \v{s}to raznovrsniji raspon
+omjera neuravnote\v{z}enosti, dimenzionalnosti i veli\v{c}ina kako bi
+se dobio \v{s}to op\'{c}enitiji uvid u pona\v{s}anje algoritama.
+Tako\dj{}er, poku\v{s}at \'{c}e se identificirati skupovi podataka koji
+donekle prate odre\dj{}ene statisti\v{c}ke distribucije (primjerice,
+normalnu, eksponencijalnu ili multimodalnu) kako bi se ispitao utjecaj
+samih algoritama na podatke razli\v{c}itih distribucijskih svojstava.
+
+Sinteti\v{c}ki skupovi generirat \'{c}e se s kontroliranim parametrima --- omjerom neuravnote\v{z}enosti, dimenzionalno\v{s}\'{c}u i razinom
+\v{s}uma --- \v{c}ime \'{c}e se omogu\'{c}iti ciljano ispitivanje
+utjecaja pojedinih karakteristika na performanse algoritama, neovisno
+o specifi\v{c}nostima stvarnih domena. Osvrnuti se na ograni\v{c}enja
+sinteti\v{c}kih skupova podataka.
+
+Dat \'{c}e se tablica s karakteristikama svih kori\v{s}tenih skupova:
+naziv, broj primjera, broj zna\v{c}ajki, omjer neuravnote\v{z}enosti
+te kategorija prema IR-u (nizak, srednji, visok).
+
+\subsection{Postavke eksperimenta}
+
+Eksperimenti \'{c}e se provesti kori\v{s}tenjem 5-struke stratificirane
+unakrsne validacije, pri \v{c}emu je u svakoj iteraciji omjer
+neuravnote\v{z}enosti o\v{c}uvan u skupu za treniranje i testiranje. Za
+svaki SMOTE algoritam testirat \'{c}e se vrijednosti parametra
+$k \in \{3, 5, 7, 10\}$, a preuzorkovanje \'{c}e se vr\v{s}iti do
+potpune balansiranosti klasa. Klasifikatori uklju\v{c}uju stablo odluke,
+slu\v{c}ajnu \v{s}umu sa 100 stabala, XGBoost, logisti\v{c}ku regresiju,
+SVM s RBF jezgrom, $k$-NN s $k=5$, Gaussov naivni Bayes i vi\v{s}eslojni
+perceptron (MLP). XGBoost koristi parametar \texttt{scale\_pos\_weight}
+za nativno rukovanje neuravnote\v{z}eno\v{s}\'{c}u klasa, dok MLP
+s jednim skrivenim slojem od 100 neurona slu\v{z}i kao neuronska
+referentna to\v{c}ka. Kao bazne metode koristit
+\'{c}e se klasifikacija bez preuzorkovanja, nasumi\v{c}no poduzorkovanje
+i nasumi\v{c}no preuzorkovanje.
+
+Prije klasifikacije provest \'{c}e se standardizacija zna\v{c}ajki
+pomo\'{c}u \texttt{StandardScaler}-a. Svaka konfiguracija ponovit
+\'{c}e se 30 puta s razli\v{c}itim po\v{c}etnim vrijednostima generatora
+slu\v{c}ajnih brojeva. Prikupljat \'{c}e se F1, G-Mean, AUC-ROC,
+Balanced Accuracy i MCC metrike, a rezultati \'{c}e se prikazati kao
+aritmeti\v{c}ka sredina $\pm$ standardna devijacija kroz svih 30
+ponavljanja. Navest \'{c}e se i hardverska te softverska konfiguracija
+na kojoj su eksperimenti izvedeni.
+
+\subsection{Rezultati}
+
+Zbog velikog broja kombinacija algoritama, klasifikatora i skupova
+podataka, rezultati \'{c}e se prikazati na vi\v{s}e komplementarnih
+na\v{c}ina, svaki s razli\v{c}itom razinom granularnosti. U glavnom
+tekstu fokus \'{c}e biti na agregiranim i statisti\v{c}ki obra\dj{}enim
+prikazima koji omogu\'{c}uju uo\v{c}avanje \v{s}irih obrazaca, dok
+\'{c}e kompletni rezultati svih eksperimenata biti dani u prilogu.
+
+Prvo, za svaku metriku dat \'{c}e se zbirna tablica s prosje\v{c}nim
+rangom svakog algoritma kroz sve skupove podataka i klasifikatore,
+poredana od najboljeg prema najlo\v{s}ijem. Ovakav prikaz omogu\'{c}uje
+brzi uvid u ukupni poredak algoritama bez zatrpavanja detaljima.
+Zatim \'{c}e se za svaku metriku prikazati kriti\v{c}ni dijagram
+(CD dijagram) koji vizualno sa\v{z}ima rezultate Friedmanovog i Nemenyi
+testa --- algoritmi koji se statisti\v{c}ki zna\v{c}ajno ne razlikuju
+povezani su vodoravnom crtom.
+
+Za detaljniji uvid, prikazat \'{c}e se heatmap-ovi koji za svaki par
+(algoritam, skup podataka) prikazuju vrijednost odabrane metrike uz
+kodiranje bojom, \v{s}to omogu\'{c}uje uo\v{c}avanje obrazaca poput
+toga koji algoritmi dominiraju na skupovima s visokim IR-om, a koji na
+onima s niskim. Box-plotovi \'{c}e se koristiti za prikaz distribucije
+rezultata po algoritmima kroz sva ponavljanja, \v{c}ime se dobiva uvid
+ne samo u prosje\v{c}nu performansu ve\'{c} i u njenu varijabilnost.
+
+Za svaki klasifikator izdvojit \'{c}e se i kratko prokomentirati
+najva\v{z}niji uo\v{c}eni obrasci --- primjerice, kod kojih klasifikatora
+preuzorkovanje donosi najve\'{c}e pobolj\v{s}anje, kako se pona\v{s}aju
+geometrijska pro\v{s}irenja u odnosu na klasi\v{c}ne varijante te u kojim
+situacijama SMOTE nema u\v{c}inka ili \v{c}ak pogor\v{s}ava rezultate.
+
+Kompletne tablice sa svim vrijednostima metrika za svaku kombinaciju
+algoritma, klasifikatora i skupa podataka bit \'{c}e prilo\v{z}ene u
+prilogu, organizirane po metrikama radi preglednosti.
+
+
+\subsection{Statisti\v{c}ka analiza}
+
+Za statisti\v{c}ku usporedbu performansi algoritama koristit \'{c}e se
+metodologija Dem\v{s}ara \cite{demsar2006}. Provest \'{c}e se
+Friedmanov test za utvr\dj{}ivanje postoje li zna\v{c}ajne razlike
+me\dj{}u algoritmima, Nemenyi post-hoc test za identifikaciju razlika
+izme\dj{}u konkretnih parova (prikazano kriti\v{c}nim dijagramima) te
+Wilcoxon signed-rank test za usporedbu svake izvedenice s osnovnim
+SMOTE-om. Dodatno, skupovi \'{c}e se grupirati prema omjeru
+neuravnote\v{z}enosti, dimenzionalnosti i razini \v{s}uma kako bi se
+ispitalo kako ovi faktori utje\v{c}u na relativne performanse
+algoritama.
+
+\subsection{Diskusija}
+
+Na temelju provedene eksperimentalne i statisti\v{c}ke analize
+interpretirat \'{c}e se dobiveni rezultati s naglaskom na sljede\'{c}a
+pitanja: koji SMOTE algoritam pokazuje najbolje ukupne performanse,
+u kojim situacijama se preporu\v{c}uje koja izvedenica, kako
+geometrijska pro\v{s}irenja stoje u odnosu na klasi\v{c}ne varijante,
+kakav je utjecaj parametra $k$ na razli\v{c}ite klasifikatore te koja
+je ra\v{c}unska zahtjevnost pojedinih algoritama. Dani \'{c}e se i
+prakti\v{c}ne preporuke za odabir algoritma temeljem karakteristika
+skupa podataka. Rezultati \'{c}e se usporediti s nalazima iz literature
+\cite{bajer2019,dudjak2020,kovacs2019,haixiang2017}.

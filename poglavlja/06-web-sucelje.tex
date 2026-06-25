@@ -1,0 +1,47 @@
+% ============================================================
+% 06-web-sucelje.tex — PRVA VERZIJA
+% ============================================================
+
+Razvijeno je i web su\v{c}elje za interaktivnu
+vizualizaciju procesa generiranja sinteti\v{c}kih primjera razli\v{c}itim
+SMOTE varijantama. Su\v{c}elje omogu\'{c}uje korisniku da na intuitivan
+na\v{c}in istra\v{z}i razlike me\dj{}u algoritmima i utjecaj njihovih
+parametara na distribuciju generiranih uzoraka.
+
+\subsubsection{Motivacija}
+
+Razumijevanje na\v{c}ina na koji razli\v{c}iti SMOTE algoritmi generiraju
+sinteti\v{c}ke primjere \v{c}esto je ote\v{z}ano zbog vi\v{s}edimenzionalne
+prirode podataka. Vizualizacija u dvije ili tri dimenzije, dobivena
+redukcijom dimenzionalnosti, omogu\'{c}uje intuitivno sagledavanje
+razlika izme\dj{}u linearnih pristupa (klasi\v{c}ni SMOTE) i
+geometrijskih pro\v{s}irenja (G-SMOTE), \v{s}to ima i zna\v{c}ajnu
+edukacijsku vrijednost.
+
+\subsubsection{Arhitektura web su\v{c}elja}
+
+Su\v{c}elje je realizirano kori\v{s}tenjem biblioteke Streamlit za
+Python koja omogu\'{c}uje brzo prototipiranje interaktivnih web
+aplikacija. Backend se izravno oslanja na implementirane SMOTE algoritme
+iz paketa \texttt{smote\_variants}. Za vizualizaciju se koristi Plotly
+(interaktivni scatter plotovi), dok se redukcija dimenzionalnosti provodi
+algoritmima PCA i t-SNE iz biblioteke scikit-learn.
+
+\subsubsection{Funkcionalnosti}
+
+Opisuju se klju\v{c}ne funkcionalnosti su\v{c}elja:
+u\v{c}itavanje vlastitog CSV skupa podataka ili odabir jednog od
+ugra\dj{}enih skupova; redukcija dimenzionalnosti na 2D/3D pomo\'{c}u
+PCA ili t-SNE; odabir jedne ili vi\v{s}e SMOTE varijanti za usporedbu;
+pode\v{s}avanje parametara ($k$, postotak preuzorkovanja); usporedni
+prikaz originalnih i sinteti\v{c}kih primjera; animacija procesa
+generiranja za 2D podatke; prikaz granice odluke klasifikatora prije i
+poslije preuzorkovanja te tablica metrika za kvantitativnu usporedbu.
+
+\subsubsection{Prikazi web su\v{c}elja}
+
+Prikazat \'{c}e se screenshotovi glavnih ekrana su\v{c}elja s kratkim
+opisima: po\v{c}etni ekran s kontrolama, PCA prikaz originalnih podataka,
+usporedni prikaz vi\v{s}e SMOTE varijanti, prikaz generiranja G-SMOTE u
+odnosu na osnovni SMOTE, granica odluke prije i poslije preuzorkovanja
+te tablica metrika.

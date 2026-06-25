@@ -1,0 +1,25 @@
+% ============================================================
+% 09-prilozi.tex — PRVA VERZIJA
+% ============================================================
+
+U prilozima dajemo materijale koji nisu neophodni za pra\'{c}enje
+glavnog teksta, ali pru\v{z}aju dodatne informacije za zainteresiranog
+\v{c}itatelja.
+
+\textbf{Prilog P.1.} Pro\v{s}ireni eksperimentalni rezultati: kompletne
+tablice F1, G-Mean i MCC vrijednosti za svih osam klasifikatora, za sve
+skupove podataka i sve SMOTE varijante. Ovdje su i tablice
+$p$-vrijednosti Friedmanovog, Nemenyi i Wilcoxon testova.
+
+\textbf{Prilog P.2.} Klju\v{c}ni dijelovi programskog k\^{o}da:
+apstraktna bazna klasa \texttt{BaseSMOTE}, implementacija osnovnog SMOTE
+algoritma, te po jedna reprezentativna klasi\v{c}na (Borderline-SMOTE) i
+geometrijska (G-SMOTE) izvedenica. Cijeli k\^{o}d je dostupan na
+GitHub repozitoriju (URL \'{c}e biti naveden naknadno).
+
+\textbf{Prilog P.3.} Upute za instalaciju ovisnosti i pokretanje:
+\begin{verbatim}
+pip install -r requirements.txt
+python run_analysis.py
+streamlit run app.py
+\end{verbatim}

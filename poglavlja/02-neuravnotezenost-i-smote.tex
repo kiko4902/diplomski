@@ -1,0 +1,154 @@
+% ============================================================
+% 02-neuravnotezenost-i-smote.tex — PRVA VERZIJA
+% ============================================================
+
+\subsection{Klasifikacija i problem neuravnote\v{z}enosti klasa}
+
+U ovom potpoglavlju bit \'{c}e opisano \v{s}to predstavlja klasifikacija
+\cite{duda2000,theodoridis2008} i \v{s}to ima za cilj, ograni\v{c}avaju\'{c}i
+se pritom na skupove podataka $\mathcal{A} \subset \mathbb{R}^m$ gdje su
+sve zna\v{c}ajke koje opisuju podatke realne. Spomenut \'{c}e se neke
+uobi\v{c}ajene primjene klasifikacije u razli\v{c}itim podru\v{c}jima,
+uklju\v{c}uju\'{c}i medicinsku dijagnostiku \cite{odajima2014,kamel2019} i
+druge domene.
+
+Zatim se opisuje \v{s}to je neuravnote\v{z}enost klasa i na koji
+na\v{c}in utje\v{c}e na problem klasifikacije --- u pravilu, rezultira
+pristrano\v{s}\'{c}u klasifikatora prema ve\'{c}inskoj klasi
+\cite{he2009,lopez2013}. Navest \'{c}e se za\v{s}to se radi o zna\v{c}ajnom
+problemu i za\v{s}to je nu\v{z}no rukovati njime na odgovaraju\'{c}i
+na\v{c}in, posebice jer je manjinska klasa \v{c}esto upravo ona od
+interesa u stvarnim primjenama. Formalno \'{c}e se definirati omjer
+neuravnote\v{z}enosti $IR = N_{\text{maj}} / N_{\text{min}}$ te
+kategorizacija skupova prema vrijednosti IR-a.
+
+Ukratko se opisuju poduzorkovanje i preuzorkovanje kao na\v{c}ini
+rukovanja navedenim problemom. Iako nema univerzalno boljeg pristupa i
+u\v{c}inkovitost ovisi o skupu podataka i klasifikatoru, preuzorkovanje
+se \v{c}e\v{s}\'{c}e koristi jer kod poduzorkovanja postoji opasnost od
+gubljenja bitnih uzoraka ve\'{c}inske klase \cite{bajer2019}. U ovom
+dijelu ukomponirat \'{c}e se i podjela skupa podataka na podskup za
+treniranje i testiranje.
+
+U odnosu na postoje\'{c}u literaturu, dodatno \'{c}e se obratiti
+pozornost na ote\v{z}avaju\'{c}e faktore koji prate problem
+neuravnote\v{z}enosti: preklapanje klasa, unutar-klasni disbalans,
+prisutnost \v{s}uma u podacima, mali apsolutni broj manjinskih primjera
+te manifold struktura podataka \cite{krawczyk2016}.
+
+\subsubsection{Neki popularni algoritmi za klasifikaciju}
+
+Postoje brojni algoritmi za klasifikaciju
+\cite{duda2000,theodoridis2008} --- nisu svi jednako prikladni za sve
+probleme i odabir klasifikatora (engl.\ model selection) predstavlja
+zaseban problem u strojnom u\v{c}enju. U nastavku se navodi osam
+klasifikatora koji \'{c}e se koristiti u eksperimentalnom dijelu
+rada, uz princip rada, klju\v{c}ne parametre te prednosti i nedostatke:
+
+\begin{itemize}
+    \item Stablo odluke (engl.\ Decision Tree, DT) --- rekurzivno dijeli
+    podatke temeljem vrijednosti zna\v{c}ajki, sklono prekomjernom
+    prilago\dj{}avanju.
+    \item Slu\v{c}ajna \v{s}uma (engl.\ Random Forest, RF) --- ansambl
+    stabala odluke s baggingom, smanjuje varijancu i robusnija je od
+    pojedina\v{c}nog stabla.
+    \item XGBoost (engl.\ Extreme Gradient Boosting) --- gradient boosting
+    ansambl s regularizacijom, \v{c}esto posti\v{z}e vrhunske rezultate
+    na tabli\v{c}nim podacima; ima ugra\dj{}enu podr\v{s}ku za
+    neuravnote\v{z}ene klase putem parametra \texttt{scale\_pos\_weight}.
+    \item Logisti\v{c}ka regresija (LR) --- linearni model s vjerojatnosnim
+    izlazom, jednostavan i \v{c}esto dobar baseline.
+    \item Stroj s potpornim vektorima (engl.\ Support Vector Machine, SVM)
+    --- maksimizira marginu izme\dj{}u klasa, RBF jezgra omogu\'{c}uje
+    nelinearnu separaciju.
+    \item Algoritam $k$-najbli\v{z}ih susjeda ($k$-NN) --- klasificira
+    temeljem klasa $k$ najbli\v{z}ih primjera, osjetljiv na distribuciju
+    i skalu zna\v{c}ajki.
+    \item Gaussov naivni Bayes (GNB) --- pretpostavlja normalnu distribuciju
+    zna\v{c}ajki i me\dj{}usobnu nezavisnost, brz i jednostavan.
+    \item Vi\v{s}eslojni perceptron (engl.\ Multi-Layer Perceptron, MLP)
+    --- jednostavna neuronska mre\v{z}a s jednim skrivenim slojem,
+    predstavlja osnovnu deep learning referentnu to\v{c}ku u usporedbi.
+\end{itemize}
+
+\subsubsection{Vrednovanje u\v{c}inkovitosti algoritama klasifikacije}
+
+Objasnit \'{c}e se \v{s}to predstavlja matrica zbunjenosti (engl.\
+confusion matrix) i kako se dobiva. Uobi\v{c}ajeno se u\v{c}inkovitost
+klasifikatora vrednuje to\v{c}no\v{s}\'{c}u klasifikacije (engl.\
+classification accuracy), no ona nije prikladna kod neuravnote\v{z}enih
+klasa --- klasifikator mo\v{z}e posti\'{c}i visoku to\v{c}nost
+predvi\dj{}aju\'{c}i isklju\v{c}ivo ve\'{c}insku klasu.
+
+Zatim \'{c}e se opisati prikladnije mjere za neuravnote\v{z}ene podatke,
+polaze\'{c}i od elemenata matrice zbunjenosti (TP, TN, FP, FN):
+F-1 mjera kao harmonijska sredina preciznosti i odziva, G-Mean
+kao geometrijska sredina odziva i specifi\v{c}nosti, AUC-ROC kao povr\v{s}ina
+ispod ROC krivulje neovisna o pragu odluke, Balanced Accuracy kao
+aritmeti\v{c}ka sredina odziva i specifi\v{c}nosti te Matthewsov
+koeficijent korelacije (MCC) koji uzima u obzir sva \v{c}etiri elementa
+matrice zbunjenosti. Za svaku mjeru dat \'{c}e se formula, interpretacija
+i rasprava o prikladnosti. Ograni\v{c}it \'{c}e se na slu\v{c}aj binarne
+klasifikacije gdje je pozitivna klasa uobi\v{c}ajeno manjinska.
+Pritom \'{c}e se koristiti literatura \cite{sokolova2009,japkowicz2011,lopez2013,he2009}.
+
+\subsection{Pregled pristupa rje\v{s}avanju problema}
+
+U ovom potpoglavlju dat \'{c}e se krovni pregled \v{c}etiriju kategorija
+pristupa rje\v{s}avanju problema neuravnote\v{z}enosti klasa, pri \v{c}emu
+\'{c}e se detaljni opisi pojedinih metoda obraditi u tre\'{c}em poglavlju
+\cite{fernandez2018book}.
+
+Prvo, metode na razini podataka koje obuhva\'{c}aju
+preuzorkovanje manjinske klase, poduzorkovanje ve\'{c}inske klase i
+njihove hibridne kombinacije. Prednost ovih metoda je neovisnost o
+klasifikatoru i jednostavnost primjene \cite{bajer2019,dudjak2020}.
+Drugo, metode na razini algoritma koje uklju\v{c}uju cost-sensitive
+u\v{c}enje i modifikacije klasifikatora \cite{elkan2001}. Tre\'{c}e,
+ansambl metode koje kombiniraju resampliranje s bagging i boosting
+pristupima \cite{galar2012}. \v{C}etvrto, deep learning pristupi koji
+obuhva\'{c}aju modifikacije loss funkcija \cite{lin2017} i generativne
+modele \cite{goodfellow2014}.
+
+\subsection{Algoritam SMOTE}
+
+U ovom potpoglavlju detaljno \'{c}e se opisati temeljni SMOTE algoritam
+\cite{chawla2002}. Prvo \'{c}e se ukratko opisati nasumi\v{c}no
+preuzorkovanje kao motivacija za nastanak SMOTE-a --- kod nasumi\v{c}nog
+preuzorkovanja dupliciraju se postoje\'{c}i primjeri manjinske klase,
+\v{s}to \v{c}esto dovodi do prekomjernog prilago\dj{}avanja. SMOTE ovaj
+problem rje\v{s}ava generiranjem novih, sinteti\v{c}kih primjera.
+
+Zatim \'{c}e se dati detaljan opis koraka algoritma: za svaki primjer
+manjinske klase $x_i$ pronalazi se $k$ najbli\v{z}ih susjeda unutar iste
+klase (Euklidskom udaljeno\v{s}\'{c}u); nasumi\v{c}no se odabire jedan
+susjed $x_{nn}$; novi sinteti\v{c}ki primjer generira se linearnom
+interpolacijom prema formuli $x_{new} = x_i + \lambda \cdot (x_{nn} - x_i)$,
+gdje je $\lambda \sim U(0,1)$. Postupak se ponavlja dok se ne postigne
+\v{z}eljeni broj sinteti\v{c}kih primjera. Bit \'{c}e prikazan i
+pseudo-k\^{o}d algoritma.
+
+Spomenut \'{c}e se parametri algoritma: broj najbli\v{z}ih susjeda $k$
+(uobi\v{c}ajeno $k = 5$ prema preporuci iz izvornog rada) i postotak
+preuzorkovanja $N$ (naj\v{c}e\v{s}\'{c}e se cilja na potpuno balansiranje).
+Naglasit \'{c}e se da izvorni SMOTE generira isklju\v{c}ivo to\v{c}ke na
+linijskim segmentima, \v{s}to ograni\v{c}ava raznolikost sinteti\v{c}kih
+uzoraka i motivira razvoj geometrijskih pro\v{s}irenja opisanih u
+tre\'{c}em poglavlju.
+
+\subsubsection{Prednosti i nedostaci}
+
+Navest \'{c}e se i kratko obrazlo\v{z}iti prednosti i nedostaci algoritma
+SMOTE. Me\dj{}u prednostima istaknut \'{c}e se: smanjenje overfittinga u
+odnosu na nasumi\v{c}no preuzorkovanje, pro\v{s}irenje regije odluke
+manjinske klase, jednostavnost implementacije, neovisnost o klasifikatoru
+te fleksibilnost u pogledu omjera preuzorkovanja.
+
+Me\dj{}u nedostacima obradit \'{c}e se: prekomjerna generalizacija jer
+algoritam generira primjere neovisno o distribuciji ve\'{c}inske klase
+\cite{stefanowski2007}, osjetljivost na \v{s}um i outlier-e, fiksni broj
+susjeda $k$ koji sve primjere tretira jednako, problem s manifold podacima
+\cite{bellinger2016}, pote\v{s}ko\'{c}e s opravdavanjem sinteti\v{c}kih
+primjera u domenama poput medicine te smanjena u\v{c}inkovitost u
+visokodimenzionalnim prostorima. Pregled navedenih ograni\v{c}enja
+temeljit \'{c}e se na radu \cite{fernandez2018}.
