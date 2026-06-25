@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SMOTE Visualizer</title>
+<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+.app { display: flex; min-height: 100vh; }
+.sidebar { width: 320px; background: #1e293b; padding: 24px 20px; border-right: 1px solid #334155; overflow-y: auto; position: fixed; top: 0; left: 0; bottom: 0; }
+.main { margin-left: 320px; flex: 1; padding: 30px; }
+.logo { font-size: 20px; font-weight: 700; margin-bottom: 6px; color: #f1f5f9; }
+.subtitle { font-size: 12px; color: #94a3b8; margin-bottom: 24px; }
+.section-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #64748b; margin: 20px 0 8px 0; padding-top: 16px; border-top: 1px solid #334155; }
+label { display: block; font-size: 12px; font-weight: 600; color: #cbd5e1; margin-bottom: 4px; margin-top: 12px; }
+select, input[type="number"], input[type="range"] { width: 100%; padding: 8px 10px; background: #0f172a; border: 1px solid #475569; border-radius: 6px; color: #e2e8f0; font-size: 13px; outline: none; transition: border-color .2s; }
+select:focus, input:focus { border-color: #6366f1; }
+.range-row { display: flex; gap: 8px; align-items: center; }
+.range-row input[type="range"] { flex: 1; padding: 0; }
+.range-val { font-size: 12px; color: #6366f1; font-weight: 600; min-width: 32px; text-align: right; }
+.btn { width: 100%; padding: 11px; background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 20px; transition: opacity .2s, transform .1s; }
+.btn:hover { opacity: 0.9; }
+.btn:active { transform: scale(0.98); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.info-box { background: #1a2744; border-left: 3px solid #6366f1; padding: 10px 12px; border-radius: 0 6px 6px 0; font-size: 12px; color: #94a3b8; margin-top: 12px; line-height: 1.5; }
+.status { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; }
+.status.success { background: #064e3b; color: #6ee7b7; border: 1px solid #065f46; }
+.status.error { background: #450a0a; color: #fca5a5; border: 1px solid #7f1d1d; }
+.status.loading { background: #1e3a5f; color: #93c5fd; border: 1px solid #1e40af; }
+.plots { display: grid; gap: 20px; }
+.plot-card { background: #1e293b; border-radius: 12px; padding: 16px; border: 1px solid #334155; }
+.plot-card .plot-title { font-size: 13px; font-weight: 600; color: #cbd5e1; margin-bottom: 8px; }
+.plot-card .plot-meta { font-size: 11px; color: #64748b; margin-bottom: 4px; }
+.plot-inner { height: 440px; }
+.header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+.badge { background: #6366f1; color: white; font-size: 10px; padding: 2px 8px; border-radius: 10px; margin-left: 8px; }
+h1 { font-size: 22px; font-weight: 700; }
+.tabs { display: flex; gap: 4px; margin-bottom: 0; }
+.tab { padding: 8px 16px; border-radius: 6px 6px 0 0; font-size: 13px; cursor: pointer; background: #1e293b; border: 1px solid #334155; border-bottom: none; color: #94a3b8; transition: all .2s; }
+.tab.active { background: #0f172a; color: #e2e8f0; border-color: #475569; }
+.tab:hover:not(.active) { color: #cbd5e1; }
+@media (max-width: 900px) { .app { flex-direction: column; } .sidebar { width: 100%; position: relative; border-right: none; border-bottom: 1px solid #334155; } .main { margin-left: 0; } }
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+<div class="logo">SMOTE Visualizer</div>
+<div class="subtitle">Interaktivna vizualizacija algoritama za balansiranje klasa</div>
+
+<div class="section-title">Podaci</div>
+<label>Vrsta skupa</label>
+<select id="dataset_type" onchange="onDatasetChange()">
+<option value="random">Slucajna klasifikacija</option>
+<option value="normal">Normalna distribucija</option>
+<option value="exponential">Eksponencijalna</option>
+<option value="multimodal">Multimodalna</option>
+<option value="circles">Kruzni podaci</option>
+<option value="breast_cancer" data-real="1">Breast Cancer (569x30)</option>
+<option value="wine" data-real="1">Wine (178x13)</option>
+<option value="iris" data-real="1">Iris (150x4)</option>
+</select>
+
+<label>Broj uzoraka <span id="n_label">(sinteticki)</span></label>
+<div class="range-row">
+<input type="range" id="n_samples" min="50" max="800" value="300" oninput="document.getElementById('n_val').textContent=this.value">
+<span class="range-val" id="n_val">300</span>
+</div>
+
+<label>Omjer neuravnotezenosti (IR)</label>
+<div class="range-row">
+<input type="range" id="ir" min="2" max="30" value="5" step="0.5" oninput="document.getElementById('ir_val').textContent=this.value">
+<span class="range-val" id="ir_val">5</span>
+</div>
+
+<label>Sum (noise)</label>
+<div class="range-row">
+<input type="range" id="noise" min="0" max="0.3" value="0.05" step="0.01" oninput="document.getElementById('noise_val').textContent=Math.round(this.value*100)+'%'">
+<span class="range-val" id="noise_val">5%</span>
+</div>
+
+<label>Seed (reproducibilnost)</label>
+<input type="number" id="seed" value="42" min="1" max="9999">
+
+<label>Redukcija dimenzija</label>
+<select id="dim_method">
+<option value="PCA">PCA</option>
+<option value="tSNE">t-SNE</option>
+</select>
+
+<div class="section-title">SMOTE Algoritam</div>
+<div class="tabs">
+<div class="tab active" id="tabSingle" onclick="switchTab('single')">Pojedinacni</div>
+<div class="tab" id="tabCompare" onclick="switchTab('compare')">Usporedba</div>
+<div class="tab" id="tabAll" onclick="switchTab('all')">Svi (12)</div>
+</div>
+
+<div id="sectionSingle">
+<label>Varijanta</label>
+<select id="smote_name" onchange="updateInf"></select>
+<div class="info-box" id="info"></div>
+</div>
+
+<div id="sectionCompare" style="display:none">
+<label>Prva varijanta</label>
+<select id="smote_name_c1" onchange="updateInf"></select>
+<div class="info-box" id="info_c1"></div>
+<label style="margin-top:16px">Druga varijanta</label>
+<select id="smote_name_c2" onchange="updateInf"></select>
+<div class="info-box" id="info_c2"></div>
+</div>
+
+<div id="sectionAll" style="display:none">
+<p style="font-size:12px;color:#94a3b8;margin-top:8px">Svih 12 algoritama na <strong>identicnom</strong> skupu podataka. Promijeni parametre i pritisni Generiraj.</p>
+</div>
+
+<button class="btn" id="generateBtn" onclick="generate()">Generiraj</button>
+
+<br><br>
+<label>Broj susjeda (k)</label>
+<input type="number" id="k" value="5" min="1" max="15">
+</aside>
+
+<main class="main">
+<div class="header-row">
+<h1>Rezultati <span class="badge" id="variantBadge" style="display:none"></span></h1>
+</div>
+<div id="statusArea"></div>
+<div class="plots" id="plots" style="grid-template-columns: 1fr;"></div>
+<div id="emptyState" style="text-align:center;margin-top:80px;color:#475569;">
+<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+<p style="margin-top:16px;font-size:15px;">Podesi parametre i pritisni <strong>Generiraj</strong></p>
+<p style="font-size:12px;color:#334155;">Odaberi SMOTE varijantu, podesi k, IR i broj uzoraka</p>
+</div>
+</main>
+</div>
+
+<script>
+let INFO = {};
+let VARIANTS = [];
+let currentTab = 'single';
+
+async function init() {
+    try {
+        const [infoRes, varRes] = await Promise.all([
+            fetch('/api/info'), fetch('/api/variants')
+        ]);
+        INFO = await infoRes.json();
+        VARIANTS = await varRes.json();
+        fillSelect('smote_name', VARIANTS, VARIANTS[0]);
+        fillSelect('smote_name_c1', VARIANTS, VARIANTS[0]);
+        fillSelect('smote_name_c2', VARIANTS, VARIANTS[1]);
+        updateInf();
+    } catch(e) { console.error('Init failed:', e); }
+}
+
+function fillSelect(id, options, selected) {
+    const sel = document.getElementById(id);
+    sel.innerHTML = '';
+    options.forEach(o => {
+        const opt = document.createElement('option');
+        opt.value = o; opt.textContent = o;
+        if (o === selected) opt.selected = true;
+        sel.appendChild(opt);
+    });
+}
+
+function updateInf() {
+    document.getElementById('info').textContent = INFO[document.getElementById('smote_name').value] || '';
+    document.getElementById('info_c1').textContent = INFO[document.getElementById('smote_name_c1').value] || '';
+    document.getElementById('info_c2').textContent = INFO[document.getElementById('smote_name_c2').value] || '';
+}
+
+function switchTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+    document.getElementById('sectionSingle').style.display = tab === 'single' ? '' : 'none';
+    document.getElementById('sectionCompare').style.display = tab === 'compare' ? '' : 'none';
+    document.getElementById('sectionAll').style.display = tab === 'all' ? '' : 'none';
+}
+
+function onDatasetChange() {
+    var ds = document.getElementById('dataset_type');
+    var opt = ds.options[ds.selectedIndex];
+    var isReal = opt.getAttribute('data-real') === '1';
+    document.getElementById('n_samples').disabled = isReal;
+    document.getElementById('ir').disabled = isReal;
+    document.getElementById('noise').disabled = isReal;
+    document.getElementById('n_label').textContent = isReal ? '(stvarno)' : '(sinteticki)';
+}
+
+async function generate() {
+    var btn = document.getElementById('generateBtn');
+    btn.disabled = true;
+    btn.textContent = 'Racunam...';
+    document.getElementById('emptyState').style.display = 'none';
+    var status = document.getElementById('statusArea');
+    status.innerHTML = '<div class="status loading">Generiranje...</div>';
+
+    var baseParams = [
+        ['k', document.getElementById('k').value],
+        ['n_samples', document.getElementById('n_samples').value],
+        ['ir', document.getElementById('ir').value],
+        ['noise', document.getElementById('noise').value],
+        ['dim_method', document.getElementById('dim_method').value],
+        ['dataset_type', document.getElementById('dataset_type').value],
+        ['seed', document.getElementById('seed').value],
+    ];
+
+    try {
+        if (currentTab === 'all') {
+            var url = '/api/smote_batch?' + new URLSearchParams(baseParams);
+            var resp = await fetch(url);
+            var data = await resp.json();
+            if (data.error) throw new Error(data.error);
+
+            status.innerHTML = '<div class="status success">Svi algoritmi na identicnom skupu | ' + data.n_orig + ' originalnih | IR \u2248 ' + data.ir.toFixed(1) + ':1 | k=' + data.k + ' | ' + data.dim + '</div>';
+
+            var plots = document.getElementById('plots');
+            plots.style.gridTemplateColumns = 'repeat(auto-fill, minmax(300px, 1fr))';
+            plots.innerHTML = '';
+            data.results.forEach(function(r, i) {
+                var div = document.createElement('div');
+                div.className = 'plot-card';
+                div.style.padding = '8px';
+                div.innerHTML = '<div class="plot-inner" style="height:260px" id="plot' + i + '"></div>';
+                plots.appendChild(div);
+                Plotly.newPlot('plot' + i, JSON.parse(r.plot_json), {}, {responsive: true, displayModeBar: false});
+            });
+        } else {
+            var params = new URLSearchParams(baseParams);
+            params.append('smote_name', currentTab === 'compare' ? document.getElementById('smote_name_c1').value : document.getElementById('smote_name').value);
+            if (currentTab === 'compare') params.append('smote_name2', document.getElementById('smote_name_c2').value);
+
+            var resp = await fetch('/api/smote?' + params);
+            var data = await resp.json();
+            if (data.error) throw new Error(data.error);
+
+            var results = data.results;
+            document.getElementById('variantBadge').style.display = 'inline';
+            document.getElementById('variantBadge').textContent = results[0].name;
+
+            if (results.length === 1) {
+                status.innerHTML = '<div class="status success">' + results[0].n_synth + ' synth | ' + data.n_orig + ' orig | IR \u2248 ' + data.ir.toFixed(1) + ':1 | ' + data.dim + ' | ' + data.dataset + '</div>';
+            } else {
+                var d = Math.abs(results[0].n_synth - results[1].n_synth);
+                status.innerHTML = '<div class="status success">' + results[0].name + ' (' + results[0].n_synth + ') vs ' + results[1].name + ' (' + results[1].n_synth + ') | \u0394=' + d + ' | ' + data.n_orig + ' orig | IR \u2248 ' + data.ir.toFixed(1) + ':1</div>';
+            }
+
+            var plots = document.getElementById('plots');
+            plots.style.gridTemplateColumns = '1fr';
+            plots.innerHTML = '';
+            results.forEach(function(r, i) {
+                var div = document.createElement('div');
+                div.className = 'plot-card';
+                div.innerHTML = '<div class="plot-meta">' + r.name + ' &middot; ' + r.n_synth + ' sintetickih od ' + r.total + ' ukupno</div><div class="plot-inner" id="plot' + i + '"></div>';
+                plots.appendChild(div);
+                Plotly.newPlot('plot' + i, JSON.parse(r.plot_json), {}, {responsive: true, displayModeBar: false});
+            });
+        }
+    } catch(e) {
+        status.innerHTML = '<div class="status error">Greska: ' + e.message + '</div>';
+    }
+    btn.disabled = false;
+    btn.textContent = 'Generiraj';
+}
+
+init();
+onDatasetChange();
+</script>
+</body>
+</html>
