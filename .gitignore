@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Testing
+.pytest_cache/
+htmlcov/
+
+# Virtual env
+venv/
+.venv/
+
+# Results (generated)
+results/
+
+# IDE
+.vscode/
+.idea/
+
+# Debug
+debug*.txt
+debug*.html
+debug*.js
+
+# OS
+.DS_Store
+Thumbs.db
